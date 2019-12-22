@@ -17,20 +17,24 @@ public class IgniteConfig {
     @Autowired
     TcpDiscoveryConfig discoverySpi;
 
-    public IgniteConfig() {
+    private String nameInstances,  nameCache;
+
+
+    public IgniteConfig(String nameInstances, String nameCache) {
+        this.nameInstances = nameInstances;
+        this.nameCache = nameCache;
         cacheConfiguration  =  new CacheConfig();
         dataStorageConfiguration =  new DataStorageConfig();
         discoverySpi = new TcpDiscoveryConfig();
     }
 
-    @Bean
+    @Bean(name = "igniteConfiguration")
     public IgniteConfiguration igniteConfiguration(){
         IgniteConfiguration cfg = new IgniteConfiguration();
-        cfg.setIgniteInstanceName("PaymentInstance");
+        cfg.setIgniteInstanceName(nameInstances);
         cfg.setPeerClassLoadingEnabled(true);
         cfg.setDataStorageConfiguration(dataStorageConfiguration.dataStorageConfiguration());
-        cfg.setCacheConfiguration(cacheConfiguration.createCache("PaymentA"),
-                cacheConfiguration.createCache("PaymentB"));
+        cfg.setCacheConfiguration(cacheConfiguration.createCache(nameCache));
         cfg.setTransactionConfiguration(transactionalConfiguration());
         cfg.setDiscoverySpi(discoverySpi.discoverySpi());
         cfg.setClientConnectorConfiguration(clientConnectConfig());

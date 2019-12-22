@@ -32,7 +32,7 @@ public class TcpDiscoveryConfig {
     }
 
 
-    private TcpDiscoveryMulticastIpFinder tcpDiscoveryMulticastIpFinder(){
+    private TcpDiscoveryMulticastIpFinder tcpDiscoveryMulticastIpFinder() {
         TcpDiscoveryMulticastIpFinder tcMp = new TcpDiscoveryMulticastIpFinder();
         tcMp.setLocalAddress("127.0.0.1");
         tcMp.setMulticastPort(11211);
