@@ -3,8 +3,8 @@ package ru.ssspokd.apacheignite.repository;
 import org.apache.ignite.springdata20.repository.IgniteRepository;
 import org.apache.ignite.springdata20.repository.config.Query;
 import org.apache.ignite.springdata20.repository.config.RepositoryConfig;
-import ru.ssspokd.apacheignite.model.Payment;
 import org.springframework.data.domain.Pageable;
+import ru.ssspokd.apacheignite.model.Payment;
 
 import javax.cache.Cache;
 import java.util.List;

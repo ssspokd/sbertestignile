@@ -1,9 +1,6 @@
 package ru.ssspokd.apacheignite.config;
 
-import org.apache.ignite.cache.CacheAtomicityMode;
-import org.apache.ignite.cache.CacheMode;
-import org.apache.ignite.cache.QueryEntity;
-import org.apache.ignite.cache.QueryIndex;
+import org.apache.ignite.cache.*;
 import org.apache.ignite.cache.store.CacheStoreSessionListener;
 import org.apache.ignite.cache.store.hibernate.CacheHibernateStoreSessionListener;
 import org.apache.ignite.configuration.CacheConfiguration;
@@ -32,7 +29,7 @@ public class CacheConfig {
     private CacheConfiguration cacheConfiguration(){
         CacheConfiguration cacheCfg = new CacheConfiguration(nameCache);
         cacheCfg.setName(nameCache);
-        cacheCfg.setCacheMode(CacheMode.PARTITIONED);
+        cacheCfg.setCacheMode(CacheMode.REPLICATED);
         cacheCfg.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
         cacheCfg.setBackups(10);
         cacheCfg.setIndexedTypes(Long.class, Payment.class);
@@ -40,6 +37,12 @@ public class CacheConfig {
         cacheCfg.setReadThrough(false);
         cacheCfg.setWriteThrough(false);
         cacheCfg.setStatisticsEnabled(true);
+        cacheCfg.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
+        //
+        cacheCfg.setWriteBehindEnabled(false);
+        cacheCfg.setWriteBehindFlushSize(1024);
+        cacheCfg.setWriteBehindFlushFrequency(5000);
+        cacheCfg.setWriteBehindBatchSize(10);
         cacheCfg.setCacheStoreSessionListenerFactories((Factory<CacheStoreSessionListener>) () -> {
             CacheHibernateStoreSessionListener lsnr = new CacheHibernateStoreSessionListener();
             lsnr.setHibernateConfigurationPath(HIBERNATE_CFG);

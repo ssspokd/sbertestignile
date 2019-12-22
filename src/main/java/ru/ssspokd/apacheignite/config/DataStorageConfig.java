@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DataStorageConfig {
 
-    private Long initSize = 1000000000L;
-    private Long maxSize = 20000000000L;
+    private Long initSize = 20000000L;
+    private Long maxSize = 300000000L;
 
     @Bean
     public DataStorageConfiguration dataStorageConfiguration(){
