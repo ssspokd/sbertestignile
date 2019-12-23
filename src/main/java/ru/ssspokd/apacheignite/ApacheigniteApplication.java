@@ -8,11 +8,9 @@ import org.apache.ignite.cluster.ClusterNode;
 import org.apache.ignite.springdata20.repository.config.EnableIgniteRepositories;
 import org.springframework.context.annotation.Configuration;
 import ru.ssspokd.apacheignite.config.IgniteConfig;
-import ru.ssspokd.apacheignite.model.EnumOperation;
 import ru.ssspokd.apacheignite.model.Payment;
 
 import java.util.Collection;
-import java.util.Date;
 
 @Configuration
 @EnableIgniteRepositories
@@ -33,8 +31,8 @@ public class ApacheigniteApplication {
         igniteClusterB.active(true);
         IgniteCache<Long, Payment> cache  = ignite.getOrCreateCache("PaymentA");
         IgniteCache<Long, Payment> cache1  = ignite1.getOrCreateCache("PaymentB");
-        cache.put(1L, new Payment(1L, "PaymentA", 5000L, new Date(), EnumOperation.NO_OPERATION));
-        cache1.put(1L, new Payment(1L, "PaymentB", 5008L, new Date(), EnumOperation.NO_OPERATION));
+        //cache.put(1L, new Payment(1L, "PaymentA", 5000L, new Date(), EnumOperation.NO_OPERATION));
+        //cache1.put(1L, new Payment(1L, "PaymentB", 5008L, new Date(), EnumOperation.NO_OPERATION));
        // igniteClusterA.enableWal("false");
        // igniteClusterB.enableWal("false");
         Collection<ClusterNode> nodesA = igniteClusterA.forServers().nodes();

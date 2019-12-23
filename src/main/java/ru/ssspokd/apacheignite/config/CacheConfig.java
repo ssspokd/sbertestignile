@@ -1,21 +1,23 @@
 package ru.ssspokd.apacheignite.config;
 
 import org.apache.ignite.cache.*;
-import org.apache.ignite.cache.store.CacheStoreSessionListener;
-import org.apache.ignite.cache.store.hibernate.CacheHibernateStoreSessionListener;
+import org.apache.ignite.cache.store.CacheStore;
+import org.apache.ignite.cache.store.jdbc.CacheJdbcPojoStoreFactory;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
 import ru.ssspokd.apacheignite.model.Payment;
 
 import javax.cache.configuration.Factory;
+import javax.sql.DataSource;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 
 @Repository
-public class CacheConfig {
+public class CacheConfig implements Serializable {
 
     private static final String HIBERNATE_CFG = "src\\main\\resources\\hibernate.cfg.xml";
     private String nameCache;
@@ -34,8 +36,8 @@ public class CacheConfig {
         cacheCfg.setBackups(10);
         cacheCfg.setIndexedTypes(Long.class, Payment.class);
         cacheCfg.setOnheapCacheEnabled(true);
-        cacheCfg.setReadThrough(false);
-        cacheCfg.setWriteThrough(false);
+        cacheCfg.setReadThrough(true);
+        cacheCfg.setWriteThrough(true);
         cacheCfg.setStatisticsEnabled(true);
         cacheCfg.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
         //
@@ -43,10 +45,25 @@ public class CacheConfig {
         cacheCfg.setWriteBehindFlushSize(1024);
         cacheCfg.setWriteBehindFlushFrequency(5000);
         cacheCfg.setWriteBehindBatchSize(10);
-        cacheCfg.setCacheStoreSessionListenerFactories((Factory<CacheStoreSessionListener>) () -> {
+        /*cacheCfg.setCacheStoreSessionListenerFactories((Factory<CacheStoreSessionListener>) () -> {
             CacheHibernateStoreSessionListener lsnr = new CacheHibernateStoreSessionListener();
             lsnr.setHibernateConfigurationPath(HIBERNATE_CFG);
+            lsnr.start();
             return lsnr;
+        });*/
+        cacheCfg.setCacheStoreFactory(new Factory<CacheStore>() {
+            @Override
+            public CacheStore create() {
+                org.apache.ignite.cache.store.jdbc.CacheJdbcPojoStoreFactory cacheJdbcPojoStoreFactory = new CacheJdbcPojoStoreFactory();
+                cacheJdbcPojoStoreFactory.setDataSourceFactory(new Factory<DataSource>() {
+                    @Override
+                    public DataSource create() {
+                        return new DataSourcesConfig().dataSource();
+                    }
+                });
+                return cacheJdbcPojoStoreFactory.create();
+
+            }
         });
         cacheCfg.setQueryEntities(Arrays.asList(setQueryEntity()));
         return  cacheCfg;
