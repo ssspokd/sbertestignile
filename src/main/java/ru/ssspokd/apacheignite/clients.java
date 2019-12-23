@@ -8,8 +8,10 @@ import org.apache.ignite.client.ClientCache;
 import org.apache.ignite.client.ClientException;
 import org.apache.ignite.client.IgniteClient;
 import org.apache.ignite.configuration.ClientConfiguration;
+import ru.ssspokd.apacheignite.model.EnumOperation;
 import ru.ssspokd.apacheignite.model.Payment;
 
+import java.util.Date;
 import java.util.List;
 
 public class clients {
@@ -20,8 +22,14 @@ public class clients {
         try (IgniteClient igniteClient = Ignition.startClient(cfg)) {
             System.out.println();
             System.out.println(">>> Thin client put-get example started.");
-
+            Payment payment =  new Payment();
+            payment.setId(1L);
+            payment.setAccountUser("Payment");
+            payment.setBalanse(5000L);
+            payment.setLastOperationDate(new Date());
+            payment.setEnumOperation(EnumOperation.NO_OPERATION);
             ClientCache clientCache = igniteClient.getOrCreateCache("PaymentA");
+            clientCache.put(payment.getId(),payment);
             FieldsQueryCursor<List<? extends Payment>> cursor = clientCache.query(new SqlFieldsQuery(
                     "select * from Payment"));
             ClientCache clientCache1 = igniteClient.getOrCreateCache("PaymentB");

@@ -2,6 +2,8 @@ package ru.ssspokd.apacheignite.config;
 
 import org.apache.ignite.cache.*;
 import org.apache.ignite.cache.store.CacheStore;
+import org.apache.ignite.cache.store.CacheStoreSessionListener;
+import org.apache.ignite.cache.store.hibernate.CacheHibernateStoreSessionListener;
 import org.apache.ignite.cache.store.jdbc.CacheJdbcPojoStoreFactory;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +23,10 @@ public class CacheConfig implements Serializable {
 
     private static final String HIBERNATE_CFG = "src\\main\\resources\\hibernate.cfg.xml";
     private String nameCache;
+    private int COUNT_BACKUPS = 10;
+    private int WRITE_BEHID_FLUSH_SIZE=1024;
+    private int WRITE_BEHID_FLUSH_FREQUENCY=5000;
+    private int WRITE_BEHID_BATCH_SIZE=10;
 
     public CacheConfiguration createCache(String nameCache){
         this.nameCache = nameCache;
@@ -33,24 +39,25 @@ public class CacheConfig implements Serializable {
         cacheCfg.setName(nameCache);
         cacheCfg.setCacheMode(CacheMode.REPLICATED);
         cacheCfg.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
-        cacheCfg.setBackups(10);
+        cacheCfg.setBackups(COUNT_BACKUPS);
         cacheCfg.setIndexedTypes(Long.class, Payment.class);
         cacheCfg.setOnheapCacheEnabled(true);
         cacheCfg.setReadThrough(true);
         cacheCfg.setWriteThrough(true);
         cacheCfg.setStatisticsEnabled(true);
         cacheCfg.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
-        //
         cacheCfg.setWriteBehindEnabled(false);
-        cacheCfg.setWriteBehindFlushSize(1024);
-        cacheCfg.setWriteBehindFlushFrequency(5000);
-        cacheCfg.setWriteBehindBatchSize(10);
-        /*cacheCfg.setCacheStoreSessionListenerFactories((Factory<CacheStoreSessionListener>) () -> {
+        cacheCfg.setWriteBehindFlushSize(WRITE_BEHID_FLUSH_SIZE);
+        cacheCfg.setWriteBehindFlushFrequency(WRITE_BEHID_FLUSH_FREQUENCY);
+        cacheCfg.setWriteBehindBatchSize(WRITE_BEHID_BATCH_SIZE);
+        cacheCfg.setCacheStoreSessionListenerFactories((Factory<CacheStoreSessionListener>) () -> {
             CacheHibernateStoreSessionListener lsnr = new CacheHibernateStoreSessionListener();
             lsnr.setHibernateConfigurationPath(HIBERNATE_CFG);
             lsnr.start();
             return lsnr;
-        });*/
+        });
+
+
         cacheCfg.setCacheStoreFactory(new Factory<CacheStore>() {
             @Override
             public CacheStore create() {

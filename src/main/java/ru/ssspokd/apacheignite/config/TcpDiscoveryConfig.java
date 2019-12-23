@@ -1,7 +1,6 @@
 package ru.ssspokd.apacheignite.config;
 
 import org.apache.ignite.resources.IgniteInstanceResource;
-import org.apache.ignite.resources.SpringResource;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.jdbc.TcpDiscoveryJdbcIpFinder;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
@@ -22,21 +21,22 @@ public class TcpDiscoveryConfig {
     @Qualifier("dataSource")
     @IgniteInstanceResource
     DataSource dataSource;
-    @Autowired
-    @IgniteInstanceResource
-    @SpringResource( resourceName = "getStrSpr")
-    String getStr;
 
+    private  int ACT_TIMEOUT=1000;
+    private  int RECONNECT_COUNT=10;
+    private  int RECONNECT_DELAY=1000;
+    private  int MAX_ACK_TIMEOUT=60000;
+    private  int SOCKET_TIMEOUT=1000;
     //@Bean
     public TcpDiscoverySpi discoverySpi(){
         TcpDiscoverySpi tcpDiscoverySpi = new TcpDiscoverySpi();
         tcpDiscoverySpi.setName("ipFinder");
-        tcpDiscoverySpi.setAckTimeout(1000);
+        tcpDiscoverySpi.setAckTimeout(ACT_TIMEOUT);
         tcpDiscoverySpi.setIpFinder(tcpDiscoveryJdbcIpFinder());
-        tcpDiscoverySpi.setReconnectCount(10);
-        tcpDiscoverySpi.setReconnectDelay(1000);
-        tcpDiscoverySpi.setMaxAckTimeout(60000);
-        tcpDiscoverySpi.setSocketTimeout(1000);
+        tcpDiscoverySpi.setReconnectCount(RECONNECT_COUNT);
+        tcpDiscoverySpi.setReconnectDelay(RECONNECT_DELAY);
+        tcpDiscoverySpi.setMaxAckTimeout(MAX_ACK_TIMEOUT);
+        tcpDiscoverySpi.setSocketTimeout(SOCKET_TIMEOUT);
         return tcpDiscoverySpi;
     }
 
