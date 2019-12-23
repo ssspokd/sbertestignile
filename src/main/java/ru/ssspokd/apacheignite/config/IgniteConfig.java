@@ -1,9 +1,7 @@
 package ru.ssspokd.apacheignite.config;
 
-import org.apache.ignite.configuration.ClientConnectorConfiguration;
-import org.apache.ignite.configuration.IgniteConfiguration;
-import org.apache.ignite.configuration.MemoryConfiguration;
-import org.apache.ignite.configuration.TransactionConfiguration;
+import org.apache.ignite.cache.store.hibernate.CacheHibernateBlobStoreFactory;
+import org.apache.ignite.configuration.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
@@ -17,6 +15,7 @@ public class IgniteConfig {
     DataStorageConfig dataStorageConfiguration;
     @Autowired
     TcpDiscoveryConfig discoverySpi;
+    private static final String HIBERNATE_CFG = "src\\main\\resources\\hibernate.cfg.xml";
 
     private String nameInstances,  nameCache;
 
@@ -39,8 +38,15 @@ public class IgniteConfig {
         cfg.setTransactionConfiguration(transactionalConfiguration());
         cfg.setDiscoverySpi(discoverySpi.discoverySpi());
         cfg.setClientConnectorConfiguration(clientConnectConfig());
-        //cfg.setMemoryConfiguration(memoryConfiguration());
+        cfg.setConnectorConfiguration(connectorConfiguration());
         return cfg;
+    }
+
+    private ConnectorConfiguration connectorConfiguration(){
+        ConnectorConfiguration connectorConfiguration=new ConnectorConfiguration();
+        connectorConfiguration.setPort(6379);
+        connectorConfiguration.setHost("127.0.0.1");
+        return connectorConfiguration;
     }
 
     private MemoryConfiguration memoryConfiguration(){
@@ -61,6 +67,11 @@ public class IgniteConfig {
 
     private TransactionConfiguration transactionalConfiguration() {
         TransactionConfiguration transactionConfiguration  = new TransactionConfiguration();
+        transactionConfiguration.setUseJtaSynchronization(true);
+        CacheHibernateBlobStoreFactory cacheHibernateBlobStoreFactory = new CacheHibernateBlobStoreFactory<>();
+        cacheHibernateBlobStoreFactory.setHibernateConfigurationPath(HIBERNATE_CFG);
+        cacheHibernateBlobStoreFactory.create();
+        transactionConfiguration.setTxManagerFactory(cacheHibernateBlobStoreFactory);
         return  transactionConfiguration;
     }
 

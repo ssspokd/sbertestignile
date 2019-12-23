@@ -1,17 +1,20 @@
 package ru.ssspokd.apacheignite.config;
 
 import org.apache.ignite.cache.*;
-import org.apache.ignite.cache.store.CacheStore;
 import org.apache.ignite.cache.store.CacheStoreSessionListener;
 import org.apache.ignite.cache.store.hibernate.CacheHibernateStoreSessionListener;
+import org.apache.ignite.cache.store.jdbc.CacheJdbcPojoStore;
 import org.apache.ignite.cache.store.jdbc.CacheJdbcPojoStoreFactory;
 import org.apache.ignite.configuration.CacheConfiguration;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
 import ru.ssspokd.apacheignite.model.Payment;
+import ru.ssspokd.apacheignite.store.CacheStore;
 
 import javax.cache.configuration.Factory;
-import javax.sql.DataSource;
+import javax.cache.configuration.FactoryBuilder;
+import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +22,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 
 @Repository
+@Transactional
 public class CacheConfig implements Serializable {
 
     private static final String HIBERNATE_CFG = "src\\main\\resources\\hibernate.cfg.xml";
@@ -32,13 +36,21 @@ public class CacheConfig implements Serializable {
         this.nameCache = nameCache;
         return  cacheConfiguration();
     }
+    private static final class CacheJdbcPojoStoreExampleFactory extends CacheJdbcPojoStoreFactory<Long, Payment> {
+        /** {@inheritDoc} */
+        @Override public CacheJdbcPojoStore<Long, Payment> create() {
+            setDataSource(JdbcConnectionPool.create("jdbc:postgresql://localhost:5432/test", "postgres", "password"));
+
+            return super.create();
+        }
+    }
 
     @Bean
     private CacheConfiguration cacheConfiguration(){
-        CacheConfiguration cacheCfg = new CacheConfiguration(nameCache);
+        CacheConfiguration<Long, Payment> cacheCfg = new CacheConfiguration(nameCache);
         cacheCfg.setName(nameCache);
         cacheCfg.setCacheMode(CacheMode.REPLICATED);
-        cacheCfg.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
+        cacheCfg.setAtomicityMode(CacheAtomicityMode.ATOMIC);
         cacheCfg.setBackups(COUNT_BACKUPS);
         cacheCfg.setIndexedTypes(Long.class, Payment.class);
         cacheCfg.setOnheapCacheEnabled(true);
@@ -46,32 +58,16 @@ public class CacheConfig implements Serializable {
         cacheCfg.setWriteThrough(true);
         cacheCfg.setStatisticsEnabled(true);
         cacheCfg.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
-        cacheCfg.setWriteBehindEnabled(false);
+        cacheCfg.setWriteBehindEnabled(true);
         cacheCfg.setWriteBehindFlushSize(WRITE_BEHID_FLUSH_SIZE);
         cacheCfg.setWriteBehindFlushFrequency(WRITE_BEHID_FLUSH_FREQUENCY);
         cacheCfg.setWriteBehindBatchSize(WRITE_BEHID_BATCH_SIZE);
         cacheCfg.setCacheStoreSessionListenerFactories((Factory<CacheStoreSessionListener>) () -> {
             CacheHibernateStoreSessionListener lsnr = new CacheHibernateStoreSessionListener();
             lsnr.setHibernateConfigurationPath(HIBERNATE_CFG);
-            lsnr.start();
             return lsnr;
         });
-
-
-        cacheCfg.setCacheStoreFactory(new Factory<CacheStore>() {
-            @Override
-            public CacheStore create() {
-                org.apache.ignite.cache.store.jdbc.CacheJdbcPojoStoreFactory cacheJdbcPojoStoreFactory = new CacheJdbcPojoStoreFactory();
-                cacheJdbcPojoStoreFactory.setDataSourceFactory(new Factory<DataSource>() {
-                    @Override
-                    public DataSource create() {
-                        return new DataSourcesConfig().dataSource();
-                    }
-                });
-                return cacheJdbcPojoStoreFactory.create();
-
-            }
-        });
+        cacheCfg.setCacheStoreFactory(FactoryBuilder.factoryOf(CacheStore.class));
         cacheCfg.setQueryEntities(Arrays.asList(setQueryEntity()));
         return  cacheCfg;
 

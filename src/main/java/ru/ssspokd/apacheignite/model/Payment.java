@@ -17,7 +17,10 @@ public class Payment implements Serializable {
     @QuerySqlField(index = true)
     private EnumOperation enumOperation;
 
-    public Payment(Long id, String accountUser, Long accountBalance, Date lastOperationDate, EnumOperation enumOperation) {
+    public Payment(Long id, String accountUser,
+                   Long accountBalance,
+                   Date lastOperationDate,
+                   EnumOperation enumOperation) {
         this.id = id;
         this.accountUser = accountUser;
         this.accountBalance = accountBalance;
@@ -42,7 +45,7 @@ public class Payment implements Serializable {
     }
 
     public void setAccountUser(String accountUser) {
-        accountUser = accountUser;
+        this.accountUser = accountUser;
     }
 
     public Long getBalanse() {
@@ -67,5 +70,16 @@ public class Payment implements Serializable {
 
     public void setEnumOperation(EnumOperation enumOperation) {
         this.enumOperation = enumOperation;
+    }
+
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "id=" + id +
+                ", accountUser='" + accountUser + '\'' +
+                ", accountBalance=" + accountBalance +
+                ", lastOperationDate=" + lastOperationDate +
+                ", enumOperation=" + enumOperation +
+                '}';
     }
 }

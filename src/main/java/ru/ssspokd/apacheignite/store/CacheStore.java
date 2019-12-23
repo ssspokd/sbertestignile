@@ -1,115 +1,83 @@
 package ru.ssspokd.apacheignite.store;
 
 import org.apache.ignite.cache.store.CacheStoreAdapter;
-import org.apache.ignite.cache.store.CacheStoreSession;
 import org.apache.ignite.lang.IgniteBiInClosure;
-import org.apache.ignite.resources.CacheStoreSessionResource;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Service;
+import ru.ssspokd.apacheignite.config.DataSourcesConfig;
 import ru.ssspokd.apacheignite.model.EnumOperation;
 import ru.ssspokd.apacheignite.model.Payment;
 
 import javax.cache.Cache;
 import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
-import java.sql.*;
+import java.util.Map;
 
+
+@Service
 public class CacheStore extends CacheStoreAdapter<Long, Payment> {
 
-    @CacheStoreSessionResource
-    private CacheStoreSession ses;
+
+    /** Spring JDBC template. */
+    private JdbcTemplate jdbcTemplate;
+
+
+    public CacheStore() {
+        this.jdbcTemplate = new JdbcTemplate( new DataSourcesConfig().dataSource());
+    }
+
+    public Payment loadLastOperation(String accountuser){
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet("select id, accountuser, \n" +
+                "accountbalance, lastoperationdate, enumoperation FROM Payment WHERE " +
+                        " accountuser = '"+accountuser
+                +"' ORDER BY lastoperationdate DESC LIMIT 1");
+        Payment payment = null;
+        if(rowSet.next()) {
+            payment =  new Payment();
+            payment.setId(rowSet.getLong(1));
+            payment.setAccountUser(rowSet.getString(2));
+            payment.setBalanse(rowSet.getLong(3));
+            payment.setLastOperationDate(rowSet.getDate(4));
+            payment.setEnumOperation(EnumOperation.valueOf(rowSet.getString(5)));
+        }
+        return  payment;
+    }
 
     @Override
     public Payment load(Long key) throws CacheLoaderException {
-        try (Connection conn = connection()) {
-            try (PreparedStatement st = conn.prepareStatement("select * from Payment where id=?")) {
-                st.setLong(1, key);
-                ResultSet rs = st.executeQuery();
-                return rs.next() ? new Payment(rs.getLong(1),
-                        rs.getString(2),
-                        rs.getLong(3),
-                        rs.getDate(4),
-                        EnumOperation.valueOf(rs.getString(5))) : null;
-            }
-        }
-        catch (SQLException e) {
-            throw new CacheLoaderException("Failed to load: " + key, e);
-        }
+        return null;
+    }
+
+
+    @Override
+    public void write(Cache.Entry<? extends Long, ? extends Payment> entry) throws CacheWriterException {
+        Long key = entry.getKey();
+        Payment val = entry.getValue();
+        jdbcTemplate.update("insert into Payment " +
+                        "(id, accountuser, accountbalance, lastoperationdate, enumoperation)" +
+                        " values (?, ?, ?,?,?)",
+                key,
+                val.getAccountUser(),
+                val.getBalanse(),
+                val.getLastOperationDate(),
+                val.getEnumOperation().name());
     }
 
     @Override
-    public void write(Cache.Entry<? extends Long, ? extends Payment> entrys) throws CacheWriterException {
-        try (Connection conn = connection()) {
-            System.out.println("not yet no");
-           /* // Syntax of MERGE statement is database specific and should be adopted for your database.
-            // If your database does not support MERGE statement then use sequentially update, insert statements.
-            try (PreparedStatement st = conn.prepareStatement("" +
-                    "")
-            {
-                for (Cache.Entry<? extends Long, ? extends Payment> entry : entrys) {
-                    Payment val = entry.getValue();
-                    st.setLong(1, entry.getKey());
-                    st.setString(2, val.getFirstName());
-                    st.setString(3, val.getLastName());
+    public void delete(Object o) throws CacheWriterException {
 
-                    st.executeUpdate();
-                }
-            }*/
-        }
-        catch (SQLException e) {
-            //throw new CacheWriterException("Failed to write [key=" + key + ", val=" + val + ']', e);
-            e.printStackTrace();
-        }
     }
 
     @Override
-    public void delete(Object key) throws CacheWriterException {
-        try (Connection conn = connection()) {
-            try (PreparedStatement st = conn.prepareStatement("delete from Payment where id=?")) {
-                st.setLong(1, (Long)key);
-
-                st.executeUpdate();
-            }
-        }
-        catch (SQLException e) {
-            throw new CacheWriterException("Failed to delete: " + key, e);
-        }
+    public void loadCache(IgniteBiInClosure<Long, Payment> clo, Object... args) {
+        super.loadCache(clo, args);
     }
 
-    // This mehtod is called whenever "loadCache()" and "localLoadCache()"
-    // methods are called on IgniteCache. It is used for bulk-loading the cache.
-    // If you don't need to bulk-load the cache, skip this method.
-    @Override public void loadCache(IgniteBiInClosure<Long, Payment> clo, Object... args) {
-        if (args == null || args.length == 0 || args[0] == null)
-            throw new CacheLoaderException("Expected entry count parameter is not provided.");
-        final int entryCnt = (Integer)args[0];
-
-        try (Connection conn = connection()) {
-            try (PreparedStatement st = conn.prepareStatement("select * from Payment")) {
-                try (ResultSet rs = st.executeQuery()) {
-                    int cnt = 0;
-
-                    while (cnt < entryCnt && rs.next()) {
-                        Payment payment = new Payment(rs.getLong(1),
-                                rs.getString(2),
-                                rs.getLong(3),
-                                rs.getDate(4),
-                                EnumOperation.valueOf(rs.getString(5)));
-                        clo.apply(payment.getId(),payment);
-                        cnt++;
-                    }
-                }
-            }
-        }
-        catch (SQLException e) {
-            throw new CacheLoaderException("Failed to load values from cache store.", e);
-        }
+    @Override
+    public Map<Long, Payment> loadAll(Iterable<? extends Long> keys) {
+        return super.loadAll(keys);
     }
 
-    // Open JDBC connection.
-    private Connection connection() throws SQLException  {
-        // Open connection to your RDBMS systems (Oracle, MySQL, Postgres, DB2, Microsoft SQL, etc.)
-        // In this example we use H2 Database for simplification.
-        Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/test");
-        conn.setAutoCommit(true);
-        return conn;
-    }
+
 }

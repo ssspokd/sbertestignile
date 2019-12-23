@@ -26,6 +26,7 @@ public class DataStorageConfig {
         dataStorageConfiguration.setMaxWalArchiveSize(MAX_WAL_ARCHIVE_SIZE);
         dataStorageConfiguration.setStoragePath(STORAGE_PATH);
         dataStorageConfiguration.setWalPath(WAL_PATH);
+        dataStorageConfiguration.setWalCompactionEnabled(true);
         dataStorageConfiguration.setWalMode(WALMode.FSYNC);
         dataStorageConfiguration.setWalArchivePath(WAL_PATH_ARCHIVE_SIZE);
         return dataStorageConfiguration;
@@ -36,7 +37,7 @@ public class DataStorageConfig {
         dataRegionConfiguration.setName(NAME_DATA_REGION_CONGIF);
         dataRegionConfiguration.setInitialSize(initSize);
         dataRegionConfiguration.setMaxSize(maxSize);
-        dataRegionConfiguration.setPageEvictionMode(DataPageEvictionMode.RANDOM_2_LRU);
+        dataRegionConfiguration.setPageEvictionMode(DataPageEvictionMode.RANDOM_LRU);
         dataRegionConfiguration.setPersistenceEnabled(true);
         dataRegionConfiguration.setMetricsEnabled(true);
         dataRegionConfiguration.setSwapPath(null);

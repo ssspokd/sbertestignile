@@ -1,18 +1,17 @@
 package ru.ssspokd.apacheignite.config;
 
 
-import org.apache.ignite.resources.ServiceResource;
-import org.apache.ignite.resources.SpringResource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.Database;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 @Configuration
@@ -42,9 +41,6 @@ public class DataSourcesConfig {
     @Value("${entitymanager.packagesToScan}")
     private String ENTITYMANAGER_PACKAGES_TO_SCAN;
 
-    @Bean(name = "dataSource")
-    @SpringResource
-    @ServiceResource(serviceName = "dataSource")
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.postgresql.Driver");
@@ -54,19 +50,17 @@ public class DataSourcesConfig {
         return dataSource;
     }
 
-
-
-    @Bean(name = "entityManagerFactory")
-    public EntityManagerFactory entityManagerFactory() {
+    @Bean(name = "entityManager")
+    public EntityManager entityManagerFactory() {
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         vendorAdapter.setDatabase(Database.POSTGRESQL);
         LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
         factory.setDataSource(dataSource());
         factory.setJpaVendorAdapter(vendorAdapter);
-        factory.setPackagesToScan("com.");
-        factory.setDataSource(dataSource());
+        factory.setPackagesToScan("ru.ssspokd");
         factory.afterPropertiesSet();
-        return factory.getObject();
+        factory.setJpaDialect(new HibernateJpaDialect());
+        return factory.getObject().createEntityManager();
     }
 
 

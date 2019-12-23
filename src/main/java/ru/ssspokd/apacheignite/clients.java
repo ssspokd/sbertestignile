@@ -2,42 +2,49 @@ package ru.ssspokd.apacheignite;
 
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.query.FieldsQueryCursor;
-import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.cache.query.SqlFieldsQuery;
 import org.apache.ignite.client.ClientCache;
 import org.apache.ignite.client.ClientException;
 import org.apache.ignite.client.IgniteClient;
 import org.apache.ignite.configuration.ClientConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.ssspokd.apacheignite.model.EnumOperation;
 import ru.ssspokd.apacheignite.model.Payment;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class clients {
 
+
+
+    private  static final Logger LOGGER = LoggerFactory.getLogger(clients.class);
+
+
     public static void main(String[] args) {
-        //startClient
         ClientConfiguration cfg = new ClientConfiguration().setAddresses("127.0.0.1:11211");
         try (IgniteClient igniteClient = Ignition.startClient(cfg)) {
-            System.out.println();
-            System.out.println(">>> Thin client put-get example started.");
-            Payment payment =  new Payment();
-            payment.setId(1L);
-            payment.setAccountUser("Payment");
-            payment.setBalanse(5000L);
-            payment.setLastOperationDate(new Date());
-            payment.setEnumOperation(EnumOperation.NO_OPERATION);
-            ClientCache clientCache = igniteClient.getOrCreateCache("PaymentA");
-            clientCache.put(payment.getId(),payment);
-            FieldsQueryCursor<List<? extends Payment>> cursor = clientCache.query(new SqlFieldsQuery(
-                    "select * from Payment"));
-            ClientCache clientCache1 = igniteClient.getOrCreateCache("PaymentB");
-            QueryCursor<List<? extends Payment>> cursor1 = clientCache1.query(new SqlFieldsQuery(
-                    "select * from Payment"));
-            System.out.println(cursor.getAll());
-            System.out.println(cursor1.getAll());
+            LOGGER.info("------------------------------------------------");
+            LOGGER.info("------------------------------------------------");
+            LOGGER.info("------------------------------------------------");
+            printCach(igniteClient.getOrCreateCache("PaymentA"));
+            printCach(igniteClient.getOrCreateCache("PaymentB"));
+            LOGGER.info("------------------------------------------------");
+            LOGGER.info("------------------------------------------------");
+            LOGGER.info("------------------------------------------------");
+            process(igniteClient.getOrCreateCache("PaymentA"),
+                    igniteClient.getOrCreateCache("PaymentB"),
+                    50);
+            LOGGER.info("------------------------------------------------");
+            LOGGER.info("------------------------------------------------");
+            LOGGER.info("------------------------------------------------");
+            printCach(igniteClient.getOrCreateCache("PaymentA"));
+            printCach(igniteClient.getOrCreateCache("PaymentB"));
 
+            printReport( igniteClient);
         } catch (ClientException e) {
             System.err.println(e.getMessage());
         } catch (Exception e) {
@@ -45,5 +52,83 @@ public class clients {
         }
 
     }
+
+    public static void printReport(IgniteClient igniteClient){
+        LOGGER.info("------------------------------------------------");
+        LOGGER.info("------------------------------------------------");
+        LOGGER.info("------------REPORT------------------------------");
+        LOGGER.info("------------------------------------------------");
+        LOGGER.info("------------------------------------------------");
+        ClientCache cacheA = igniteClient.getOrCreateCache("PaymentA");
+        ClientCache cacheB = igniteClient.getOrCreateCache("PaymentB");
+        Object o = cacheA.query(new SqlFieldsQuery("select * from payment")).getAll().get(0);
+        Object o1 = cacheB.query(new SqlFieldsQuery("select * from payment")).getAll().get(0);
+        ArrayList A =  ((ArrayList) o);
+        ArrayList B =  ((ArrayList) o1);
+        LOGGER.info("amountBalance PaymentA: " + A.get(2));
+        LOGGER.info("amountBalance PaymentB: " + B.get(2));
+        long result = Long.valueOf(A.get(2).toString()) + Long.valueOf(B.get(2).toString());
+        LOGGER.info("balance PaymnetA and PaymentB:" + result);
+
+    }
+
+    private static void process(ClientCache<Long, Payment> cacheA,
+                                ClientCache<Long, Payment> cacheB,
+                                int countRandomOperation) {
+        for(int i = 0; i < countRandomOperation; i ++) {
+            LOGGER.info("iteration number:" + i);
+            Payment paymentA = cacheA.get(1L);
+            Payment paymentB = cacheB.get(1L);
+            long ammountPaymentA = paymentA.getBalanse();
+            long ammountPaymentB = paymentB.getBalanse();
+            long ammountForTransfer = ThreadLocalRandom.current().nextLong(1, 100);
+            int randomInt = ThreadLocalRandom.current().nextInt(0,2);
+            LOGGER.info("ammountBalanseA:" + paymentA.getBalanse() + "\n " +
+                    "ammountBalanseA:" + paymentA.getBalanse());
+            LOGGER.info("random int = " + randomInt);
+            if (randomInt == 1) {
+                paymentA.setBalanse(ammountPaymentA - ammountForTransfer);
+                paymentB.setBalanse(ammountPaymentB + ammountForTransfer);
+                paymentA.setLastOperationDate(new Date());
+                paymentA.setEnumOperation(EnumOperation.AMOUNT_TRANSFER);
+                paymentB.setEnumOperation(EnumOperation.CREDIT_AMOUNT);
+                paymentB.setLastOperationDate(new Date());
+            }
+            else {
+                paymentA.setBalanse(ammountPaymentA + ammountForTransfer);
+                paymentB.setBalanse(ammountPaymentB - ammountForTransfer);
+                paymentA.setLastOperationDate(new Date());
+                paymentA.setEnumOperation(EnumOperation.CREDIT_AMOUNT);
+                paymentB.setEnumOperation(EnumOperation.AMOUNT_TRANSFER);
+                paymentB.setLastOperationDate(new Date());
+            }
+            cacheA.put(1L,paymentA);
+            cacheB.put(1L,paymentB);
+            printCach(cacheA);
+            printCach(cacheB);
+        }
+    }
+
+    public static void  printCach(ClientCache clientCache){
+        FieldsQueryCursor<List<? extends Payment>> cursor = clientCache.query(new SqlFieldsQuery(
+                "select * from payment"));
+        LOGGER.debug("", cursor.getAll());
+    }
+
+    public  static void putCache(ClientCache clientCache, Payment payment){
+        clientCache.put(payment.getId(),payment);
+
+    }
+
+    public static Payment newPayment(String name, Long balanseAmount, EnumOperation enumOperation){
+        Payment payment = new Payment();
+        payment.setId(1L);
+        payment.setAccountUser(name);
+        payment.setBalanse(balanseAmount);
+        payment.setLastOperationDate(new Date());
+        payment.setEnumOperation(enumOperation);
+        return  payment;
+    }
+
 
 }
