@@ -1,7 +1,10 @@
 package ru.ssspokd.apacheignite.config;
 
 import org.apache.ignite.cache.store.hibernate.CacheHibernateBlobStoreFactory;
-import org.apache.ignite.configuration.*;
+import org.apache.ignite.configuration.ClientConnectorConfiguration;
+import org.apache.ignite.configuration.ConnectorConfiguration;
+import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.configuration.TransactionConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
@@ -49,14 +52,6 @@ public class IgniteConfig {
         return connectorConfiguration;
     }
 
-    private MemoryConfiguration memoryConfiguration(){
-        MemoryConfiguration memoryConfiguration = new MemoryConfiguration();
-        memoryConfiguration.setPageSize(4096);
-        memoryConfiguration.setSystemCacheInitialSize(40 * 1024 * 1024);
-        memoryConfiguration.setSystemCacheMaxSize(40 * 1024 * 1024);
-
-        return memoryConfiguration;
-    }
 
     private ClientConnectorConfiguration clientConnectConfig() {
         ClientConnectorConfiguration clientConnectorConfiguration = new ClientConnectorConfiguration();

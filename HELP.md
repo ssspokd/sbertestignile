@@ -1,0 +1,23 @@
+-server
+-Xms1024M
+-Xmx2024M
+-XX:MaxDirectMemorySize=1G
+-Djava.net.preferIPv4Stack=true
+-DIGNITE_QUIET=false
+-XX:+UseTLAB
+-XX:NewSize=128m
+-XX:MaxNewSize=128m
+-XX:MaxTenuringThreshold=0
+-XX:SurvivorRatio=1024
+-XX:+UseCMSInitiatingOccupancyOnly
+-XX:CMSInitiatingOccupancyFraction=60
+-XX:MaxGCPauseMillis=1000
+-XX:InitiatingHeapOccupancyPercent=50
+-XX:+UseCompressedOops
+-XX:ParallelGCThreads=8
+-XX:ConcGCThreads=8
+-XX:+DisableExplicitGC
+-Djava.net.preferIPv4Stack=true
+-DIGNITE_SKIP_CONFIGURATION_CONSISTENCY_CHECK=true
+ 
+ mvn install -DskipTests -Plgpl -pl modules/hibernate -am

@@ -3,10 +3,7 @@ package ru.ssspokd.apacheignite.config;
 import org.apache.ignite.cache.*;
 import org.apache.ignite.cache.store.CacheStoreSessionListener;
 import org.apache.ignite.cache.store.hibernate.CacheHibernateStoreSessionListener;
-import org.apache.ignite.cache.store.jdbc.CacheJdbcPojoStore;
-import org.apache.ignite.cache.store.jdbc.CacheJdbcPojoStoreFactory;
 import org.apache.ignite.configuration.CacheConfiguration;
-import org.h2.jdbcx.JdbcConnectionPool;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
 import ru.ssspokd.apacheignite.model.Payment;
@@ -35,14 +32,6 @@ public class CacheConfig implements Serializable {
     public CacheConfiguration createCache(String nameCache){
         this.nameCache = nameCache;
         return  cacheConfiguration();
-    }
-    private static final class CacheJdbcPojoStoreExampleFactory extends CacheJdbcPojoStoreFactory<Long, Payment> {
-        /** {@inheritDoc} */
-        @Override public CacheJdbcPojoStore<Long, Payment> create() {
-            setDataSource(JdbcConnectionPool.create("jdbc:postgresql://localhost:5432/test", "postgres", "password"));
-
-            return super.create();
-        }
     }
 
     @Bean

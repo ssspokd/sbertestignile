@@ -6,7 +6,6 @@ import org.apache.ignite.spi.discovery.tcp.ipfinder.jdbc.TcpDiscoveryJdbcIpFinde
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,6 @@ import java.util.Arrays;
 public class TcpDiscoveryConfig {
 
     @Autowired
-    @Qualifier("dataSource")
     @IgniteInstanceResource
     DataSource dataSource;
 
@@ -27,7 +25,7 @@ public class TcpDiscoveryConfig {
     private  int RECONNECT_DELAY=1000;
     private  int MAX_ACK_TIMEOUT=60000;
     private  int SOCKET_TIMEOUT=1000;
-    //@Bean
+
     public TcpDiscoverySpi discoverySpi(){
         TcpDiscoverySpi tcpDiscoverySpi = new TcpDiscoverySpi();
         tcpDiscoverySpi.setName("ipFinder");

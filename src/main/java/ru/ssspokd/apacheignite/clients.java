@@ -7,8 +7,8 @@ import org.apache.ignite.client.ClientCache;
 import org.apache.ignite.client.ClientException;
 import org.apache.ignite.client.IgniteClient;
 import org.apache.ignite.configuration.ClientConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import ru.ssspokd.apacheignite.model.EnumOperation;
 import ru.ssspokd.apacheignite.model.Payment;
 
@@ -21,8 +21,12 @@ public class clients {
 
 
 
-    private  static final Logger LOGGER = LoggerFactory.getLogger(clients.class);
-
+    private  static  Logger LOGGER = Logger.getLogger(clients.class);
+    static {
+        LOGGER.setLevel(Level.ALL);
+        LOGGER.setAdditivity(true);
+        org.apache.log4j.BasicConfigurator.configure();
+    }
 
     public static void main(String[] args) {
         ClientConfiguration cfg = new ClientConfiguration().setAddresses("127.0.0.1:11211");
@@ -53,7 +57,7 @@ public class clients {
 
     }
 
-    public static void printReport(IgniteClient igniteClient){
+    private static void printReport(IgniteClient igniteClient){
         LOGGER.info("------------------------------------------------");
         LOGGER.info("------------------------------------------------");
         LOGGER.info("------------REPORT------------------------------");
@@ -109,26 +113,10 @@ public class clients {
         }
     }
 
-    public static void  printCach(ClientCache clientCache){
+    private static void  printCach(ClientCache clientCache){
         FieldsQueryCursor<List<? extends Payment>> cursor = clientCache.query(new SqlFieldsQuery(
                 "select * from payment"));
-        LOGGER.debug("", cursor.getAll());
+        LOGGER.info(cursor.getAll());
     }
-
-    public  static void putCache(ClientCache clientCache, Payment payment){
-        clientCache.put(payment.getId(),payment);
-
-    }
-
-    public static Payment newPayment(String name, Long balanseAmount, EnumOperation enumOperation){
-        Payment payment = new Payment();
-        payment.setId(1L);
-        payment.setAccountUser(name);
-        payment.setBalanse(balanseAmount);
-        payment.setLastOperationDate(new Date());
-        payment.setEnumOperation(enumOperation);
-        return  payment;
-    }
-
 
 }
