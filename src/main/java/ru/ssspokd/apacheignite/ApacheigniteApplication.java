@@ -14,6 +14,7 @@ import javax.cache.CacheException;
 import java.util.Collection;
 import java.util.Date;
 
+
 @Configuration
 @EnableIgniteRepositories
 public class ApacheigniteApplication {

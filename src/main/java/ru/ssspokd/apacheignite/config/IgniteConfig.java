@@ -1,10 +1,13 @@
 package ru.ssspokd.apacheignite.config;
 
+import org.apache.ignite.IgniteCheckedException;
+import org.apache.ignite.IgniteLogger;
 import org.apache.ignite.cache.store.hibernate.CacheHibernateBlobStoreFactory;
 import org.apache.ignite.configuration.ClientConnectorConfiguration;
 import org.apache.ignite.configuration.ConnectorConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.configuration.TransactionConfiguration;
+import org.apache.ignite.logger.log4j.Log4JLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
@@ -44,7 +47,18 @@ public class IgniteConfig {
         cfg.setDiscoverySpi(discoverySpi.discoverySpi());
         cfg.setClientConnectorConfiguration(clientConnectConfig());
         cfg.setConnectorConfiguration(connectorConfiguration());
+        cfg.setGridLogger(igniteLogger());
         return cfg;
+    }
+
+    private IgniteLogger igniteLogger(){
+        IgniteLogger log = null;
+        try {
+            log = new Log4JLogger("src\\main\\resources\\log4j.xml");
+        } catch (IgniteCheckedException e) {
+            e.printStackTrace();
+        }
+        return log;
     }
 
     private ConnectorConfiguration connectorConfiguration(){

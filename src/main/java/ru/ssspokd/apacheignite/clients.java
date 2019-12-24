@@ -7,11 +7,13 @@ import org.apache.ignite.client.ClientCache;
 import org.apache.ignite.client.ClientException;
 import org.apache.ignite.client.IgniteClient;
 import org.apache.ignite.configuration.ClientConfiguration;
+import org.apache.ignite.resources.SpringResource;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import ru.ssspokd.apacheignite.model.EnumOperation;
 import ru.ssspokd.apacheignite.model.Payment;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +21,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class clients {
 
-
+    @SpringResource(resourceClass = ru.ssspokd.apacheignite.config.DataSourcesConfig.class)
+    DataSource dataSource;
 
     private  static  Logger LOGGER = Logger.getLogger(clients.class);
     static {
@@ -29,6 +32,8 @@ public class clients {
     }
 
     public static void main(String[] args) {
+        clients clients = new clients();
+        DataSource dataSource = clients.dataSource;
         ClientConfiguration cfg = new ClientConfiguration().setAddresses("127.0.0.1:11211");
         try (IgniteClient igniteClient = Ignition.startClient(cfg)) {
             LOGGER.info("------------------------------------------------");

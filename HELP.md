@@ -1,3 +1,4 @@
+#параметры JAVA_OPTS для запуска программы
 -server
 -Xms1024M
 -Xmx2024M
@@ -19,5 +20,6 @@
 -XX:+DisableExplicitGC
 -Djava.net.preferIPv4Stack=true
 -DIGNITE_SKIP_CONFIGURATION_CONSISTENCY_CHECK=true
- 
- mvn install -DskipTests -Plgpl -pl modules/hibernate -am
+
+#сборка кода
+mvn install -DskipTests -Plgpl -pl modules/hibernate -am
