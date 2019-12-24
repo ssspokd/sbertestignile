@@ -13,15 +13,14 @@ import org.springframework.stereotype.Repository;
 public class IgniteConfig {
 
     @Autowired
-    CacheConfig cacheConfiguration;
+    private CacheConfig cacheConfiguration;
     @Autowired
-    DataStorageConfig dataStorageConfiguration;
+    private DataStorageConfig dataStorageConfiguration;
     @Autowired
-    TcpDiscoveryConfig discoverySpi;
+    private TcpDiscoveryConfig discoverySpi;
     private static final String HIBERNATE_CFG = "src\\main\\resources\\hibernate.cfg.xml";
 
     private String nameInstances,  nameCache;
-
 
     public IgniteConfig(String nameInstances, String nameCache) {
         this.nameInstances = nameInstances;
@@ -29,6 +28,9 @@ public class IgniteConfig {
         cacheConfiguration  =  new CacheConfig();
         dataStorageConfiguration =  new DataStorageConfig();
         discoverySpi = new TcpDiscoveryConfig();
+    }
+
+    public IgniteConfig() {
     }
 
     @Bean(name = "igniteConfiguration")
