@@ -9,13 +9,11 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 @Configuration
-@Repository
 public class DataSourcesConfig {
     @Value("${db.driver}")
     private String DB_DRIVER;
@@ -64,7 +62,4 @@ public class DataSourcesConfig {
         factory.setJpaDialect(new HibernateJpaDialect());
         return factory.getObject().createEntityManager();
     }
-
-
-
 }

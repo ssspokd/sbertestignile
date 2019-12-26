@@ -6,25 +6,23 @@ import org.apache.ignite.spi.discovery.tcp.ipfinder.jdbc.TcpDiscoveryJdbcIpFinde
 import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
 
-@Repository
-@Service
+@Configuration
 public class TcpDiscoveryConfig {
 
     @Autowired
     @IgniteInstanceResource
     DataSource dataSource;
 
-    private  int ACT_TIMEOUT=1000;
-    private  int RECONNECT_COUNT=10;
-    private  int RECONNECT_DELAY=1000;
-    private  int MAX_ACK_TIMEOUT=60000;
-    private  int SOCKET_TIMEOUT=1000;
+    private static int ACT_TIMEOUT=1000;
+    private static int RECONNECT_COUNT=10;
+    private static int RECONNECT_DELAY=1000;
+    private static int MAX_ACK_TIMEOUT=60000;
+    private static int SOCKET_TIMEOUT=1000;
 
     public TcpDiscoverySpi discoverySpi(){
         TcpDiscoverySpi tcpDiscoverySpi = new TcpDiscoverySpi();
@@ -38,13 +36,11 @@ public class TcpDiscoveryConfig {
         return tcpDiscoverySpi;
     }
 
-
     private TcpDiscoveryVmIpFinder tcpDiscoveryVmIpFinder(){
-        TcpDiscoveryVmIpFinder tcpDiscoveryVmIpFinder =  new TcpDiscoveryVmIpFinder();
+        TcpDiscoveryVmIpFinder tcpDiscoveryVmIpFinder = new TcpDiscoveryVmIpFinder();
         tcpDiscoveryVmIpFinder.setAddresses(Arrays.asList("127.0.0.1:11211", "127.0.0.1:47500..47509"));
         return  tcpDiscoveryVmIpFinder;
     }
-
 
     private TcpDiscoveryMulticastIpFinder tcpDiscoveryMulticastIpFinder() {
         TcpDiscoveryMulticastIpFinder tcMp = new TcpDiscoveryMulticastIpFinder();
@@ -54,8 +50,8 @@ public class TcpDiscoveryConfig {
     }
 
     private TcpDiscoveryJdbcIpFinder tcpDiscoveryJdbcIpFinder(){
-        TcpDiscoveryJdbcIpFinder tcpDiscoveryJdbcIpFinder =  new TcpDiscoveryJdbcIpFinder();
-        if(dataSource==null){
+        TcpDiscoveryJdbcIpFinder tcpDiscoveryJdbcIpFinder = new TcpDiscoveryJdbcIpFinder();
+        if(dataSource == null){
             DataSourcesConfig dataSourcesConfig = new DataSourcesConfig();
             dataSource = dataSourcesConfig.dataSource();
         }

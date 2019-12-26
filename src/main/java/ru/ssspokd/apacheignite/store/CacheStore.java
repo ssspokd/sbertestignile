@@ -27,6 +27,8 @@ public class CacheStore extends CacheStoreAdapter<Long, Payment> {
         this.jdbcTemplate = new JdbcTemplate( new DataSourcesConfig().dataSource());
     }
 
+
+    @SuppressWarnings("unchecked")
     public Payment loadLastOperation(String accountuser){
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet("select id, accountuser, \n" +
                 "accountbalance, lastoperationdate, enumoperation FROM Payment WHERE " +
@@ -46,9 +48,8 @@ public class CacheStore extends CacheStoreAdapter<Long, Payment> {
 
     @Override
     public Payment load(Long key) throws CacheLoaderException {
-        return null;
+        return new Payment();
     }
-
 
     @Override
     public void write(Cache.Entry<? extends Long, ? extends Payment> entry) throws CacheWriterException {
@@ -66,7 +67,7 @@ public class CacheStore extends CacheStoreAdapter<Long, Payment> {
 
     @Override
     public void delete(Object o) throws CacheWriterException {
-
+        new Throwable("not yet");
     }
 
     @Override

@@ -22,7 +22,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class clients {
 
     @SpringResource(resourceClass = ru.ssspokd.apacheignite.config.DataSourcesConfig.class)
-    DataSource dataSource;
+    private DataSource dataSource;
 
     private  static  Logger LOGGER = Logger.getLogger(clients.class);
     static {
@@ -57,9 +57,8 @@ public class clients {
         } catch (ClientException e) {
             System.err.println(e.getMessage());
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
         }
-
     }
 
     private static void printReport(IgniteClient igniteClient){
@@ -76,7 +75,7 @@ public class clients {
         ArrayList B =  ((ArrayList) o1);
         LOGGER.info("amountBalance PaymentA: " + A.get(2));
         LOGGER.info("amountBalance PaymentB: " + B.get(2));
-        long result = Long.valueOf(A.get(2).toString()) + Long.valueOf(B.get(2).toString());
+        long result = Long.parseLong(A.get(2).toString()) + Long.parseLong(B.get(2).toString());
         LOGGER.info("balance PaymnetA and PaymentB:" + result);
 
     }
@@ -123,5 +122,4 @@ public class clients {
                 "select * from payment"));
         LOGGER.info(cursor.getAll());
     }
-
 }

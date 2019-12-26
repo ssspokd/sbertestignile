@@ -5,37 +5,36 @@ import org.apache.ignite.cache.store.CacheStoreSessionListener;
 import org.apache.ignite.cache.store.hibernate.CacheHibernateStoreSessionListener;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Repository;
+import org.springframework.context.annotation.Configuration;
 import ru.ssspokd.apacheignite.model.Payment;
 import ru.ssspokd.apacheignite.store.CacheStore;
 
 import javax.cache.configuration.Factory;
 import javax.cache.configuration.FactoryBuilder;
-import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 
-@Repository
-@Transactional
+@Configuration
 public class CacheConfig implements Serializable {
 
     private static final String HIBERNATE_CFG = "src\\main\\resources\\hibernate.cfg.xml";
     private String nameCache;
-    private int COUNT_BACKUPS = 10;
-    private int WRITE_BEHID_FLUSH_SIZE=1024;
-    private int WRITE_BEHID_FLUSH_FREQUENCY=5000;
-    private int WRITE_BEHID_BATCH_SIZE=10;
+    private static int COUNT_BACKUPS = 10;
+    private static int WRITE_BEHID_FLUSH_SIZE=1024;
+    private static int WRITE_BEHID_FLUSH_FREQUENCY=5000;
+    private static int WRITE_BEHID_BATCH_SIZE=10;
 
-    public CacheConfiguration createCache(String nameCache){
+    CacheConfiguration createCache(String nameCache){
         this.nameCache = nameCache;
         return  cacheConfiguration();
     }
 
+    @SuppressWarnings("unchecked")
     @Bean
-    private CacheConfiguration cacheConfiguration(){
+    CacheConfiguration cacheConfiguration(){
         CacheConfiguration<Long, Payment> cacheCfg = new CacheConfiguration(nameCache);
         cacheCfg.setName(nameCache);
         cacheCfg.setCacheMode(CacheMode.REPLICATED);
@@ -57,9 +56,8 @@ public class CacheConfig implements Serializable {
             return lsnr;
         });
         cacheCfg.setCacheStoreFactory(FactoryBuilder.factoryOf(CacheStore.class));
-        cacheCfg.setQueryEntities(Arrays.asList(setQueryEntity()));
+        cacheCfg.setQueryEntities(Collections.singletonList(setQueryEntity()));
         return  cacheCfg;
-
     }
 
 
@@ -68,7 +66,7 @@ public class CacheConfig implements Serializable {
         QueryEntity queryEntity = new QueryEntity();
         queryEntity.setKeyType(Long.class.getName());
         queryEntity.setValueType(Payment.class.getName());
-        LinkedHashMap<String, String> fields = new LinkedHashMap();
+        LinkedHashMap fields = new LinkedHashMap();
         fields.put("id", Long.class.getName());
         fields.put("accountUser", Long.class.getName());
         fields.put("accountBalance", String.class.getName());
@@ -82,5 +80,4 @@ public class CacheConfig implements Serializable {
         queryEntity.setIndexes(indexes);
         return queryEntity;
     }
-
 }

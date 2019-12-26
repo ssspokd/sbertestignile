@@ -1,12 +1,13 @@
 package ru.ssspokd.apacheignite.config;
+
 import org.apache.ignite.configuration.DataPageEvictionMode;
 import org.apache.ignite.configuration.DataRegionConfiguration;
 import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.WALMode;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Repository;
+import org.springframework.context.annotation.Configuration;
 
-@Repository
+@Configuration
 public class DataStorageConfig {
 
     private Long initSize = 20000000L;
@@ -43,5 +44,4 @@ public class DataStorageConfig {
         dataRegionConfiguration.setSwapPath(null);
         return dataRegionConfiguration;
     }
-
 }

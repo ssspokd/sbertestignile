@@ -49,10 +49,7 @@ public class ApacheigniteApplication {
 
     }
 
-
-
-
-      private void initCache(IgniteCache<Long, Payment> cache,Ignite ignite){
+    private void initCache(IgniteCache<Long, Payment> cache,Ignite ignite){
         IgniteTransactions transactions = ignite.transactions();
         CacheStore cacheStore = new CacheStore();
         Payment payment = cacheStore.loadLastOperation(cache.getName());
@@ -80,10 +77,8 @@ public class ApacheigniteApplication {
         }
       }
 
-
     public static void main(String[] args) {
         ApacheigniteApplication apacheigniteApplication = new ApacheigniteApplication();
         apacheigniteApplication.Run();
     }
-
 }
