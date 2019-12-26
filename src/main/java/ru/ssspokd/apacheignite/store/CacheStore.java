@@ -28,7 +28,7 @@ public class CacheStore extends CacheStoreAdapter<Long, Payment> {
     }
 
 
-    @SuppressWarnings(value = "unchecked")
+    @SuppressWarnings({"unchecked", "SqlResolve"})
     public Payment loadLastOperation(String accountuser){
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet("select id, accountuser, \n" +
                 "accountbalance, lastoperationdate, enumoperation FROM Payment WHERE " +
@@ -52,6 +52,7 @@ public class CacheStore extends CacheStoreAdapter<Long, Payment> {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "SqlResolve"})
     public void write(Cache.Entry<? extends Long, ? extends Payment> entry) throws CacheWriterException {
         Long key = entry.getKey();
         Payment val = entry.getValue();
@@ -67,8 +68,9 @@ public class CacheStore extends CacheStoreAdapter<Long, Payment> {
 
     @Override
     public void delete(Object o) throws CacheWriterException {
-        new Throwable("not yet");
+        new RuntimeException("not yet");
     }
+
 
     @Override
     public void loadCache(IgniteBiInClosure<Long, Payment> clo, Object... args) {
