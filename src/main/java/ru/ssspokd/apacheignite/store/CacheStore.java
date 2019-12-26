@@ -28,7 +28,7 @@ public class CacheStore extends CacheStoreAdapter<Long, Payment> {
     }
 
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(value = "unchecked")
     public Payment loadLastOperation(String accountuser){
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet("select id, accountuser, \n" +
                 "accountbalance, lastoperationdate, enumoperation FROM Payment WHERE " +
