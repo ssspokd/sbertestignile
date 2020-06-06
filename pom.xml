@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <ignite.version>2.7.0</ignite.version>
+        <ignite.version>2.8.1</ignite.version>
         <spring.version>5.2.2.RELEAS</spring.version>
         <start-class>ru.ssspokd.apacheignite.ApacheigniteApplication</start-class>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
